@@ -38,7 +38,7 @@ public class ProductoService {
 
         Producto nuevoProducto = productoMapper.toEntity(requestDTO);
         nuevoProducto.setCategoria(categoriaEncontrada);
-d 
+
         return productoMapper.toDto(productoRepository.save(nuevoProducto));
     }
 
