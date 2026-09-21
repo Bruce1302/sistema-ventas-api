@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.controller;
 import com.project.sistema_ventas_api.dto.productoDTO.ProductoRequestDTO;
 import com.project.sistema_ventas_api.dto.productoDTO.ProductoResponseDTO;
 import com.project.sistema_ventas_api.service.ProductoService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,9 @@ public class ProductoController {
     }
 
     @GetMapping()
-    public List<ProductoResponseDTO> listarProductos() {
-        return productoService.listarProductos();
+    public Page<ProductoResponseDTO> listarProductos(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size)
+    {
+        return productoService.listarProductos(page, size);
     }
 
     @DeleteMapping("/{id}")

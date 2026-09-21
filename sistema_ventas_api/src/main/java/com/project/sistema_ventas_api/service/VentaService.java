@@ -5,15 +5,20 @@ import com.project.sistema_ventas_api.dto.ventaDTO.VentaResponseDTO;
 import com.project.sistema_ventas_api.entity.DetalleVenta;
 import com.project.sistema_ventas_api.entity.Producto;
 import com.project.sistema_ventas_api.entity.Venta;
+import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.VentaMapper;
 import com.project.sistema_ventas_api.repository.ProductoRepository;
 import com.project.sistema_ventas_api.repository.VentaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class VentaService {
@@ -46,7 +51,7 @@ public class VentaService {
         for (DetalleVenta detalleVenta : detallesVenta)
         {
             //Buscamos el producto de cada detalle
-            Producto productoEncontrado = productoRepository.findById(detalleVenta.getProducto().getId()).orElseThrow(() -> new RuntimeException("Producto no encontrado " + detalleVenta.getProducto().getId()));
+            Producto productoEncontrado = productoRepository.findById(detalleVenta.getProducto().getId()).orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado " + detalleVenta.getProducto().getId()));
 
             //Si el producto no existe se envia el error
             if(productoEncontrado.getStock() < detalleVenta.getCantidad())
@@ -72,7 +77,53 @@ public class VentaService {
 
         //No se necesita hacer un update al producto, jpa lo guarda automaticamente
 
+        //NO se necesita guardar manualmente los detalles en la bd, al haber una relacion en las entidades, se hace automaticamente
+
         //Guardamos la venta
         return ventaMapper.toDto(ventaRepository.save(venta));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<VentaResponseDTO> listarVentas(int page, int size)
+    {
+        //solicitud de paginacion
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Venta> paginaVentas = ventaRepository.findAll(pageable);
+
+        return paginaVentas.map(venta -> {
+            VentaResponseDTO dto = ventaMapper.toDto(venta);
+            dto.setCantidadProductosVendidos(venta.getDetalles().size());
+            return dto;
+        });
+    }
+
+    @Transactional
+    public void eliminarVenta(UUID id)
+    {
+        ventaRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada"));
+        ventaRepository.deleteById(id.toString());
+    }
+
+    @Transactional
+    public VentaResponseDTO actualizarVenta(UUID id, VentaRequestDTO requestDTO)
+    {
+        Venta ventaEncontrada = ventaRepository.findById(id.toString()).orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+
+        ventaEncontrada.setDetalles(ventaMapper.toEntity(requestDTO).getDetalles());
+        ventaEncontrada.setTotal(ventaMapper.toEntity(requestDTO).getTotal());
+
+        return ventaMapper.toDto(ventaRepository.save(ventaEncontrada));
+    }
+
+    @Transactional(readOnly = true)
+    public VentaResponseDTO buscarVentaPorId(UUID id)
+    {
+        Venta venta = ventaRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada"));
+
+        VentaResponseDTO dto = ventaMapper.toDto(venta);
+        dto.setCantidadProductosVendidos(venta.getDetalles().size());
+
+        return dto;
     }
 }

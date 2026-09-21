@@ -4,9 +4,13 @@ import com.project.sistema_ventas_api.dto.productoDTO.ProductoRequestDTO;
 import com.project.sistema_ventas_api.dto.productoDTO.ProductoResponseDTO;
 import com.project.sistema_ventas_api.entity.Categoria;
 import com.project.sistema_ventas_api.entity.Producto;
+import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.ProductoMapper;
 import com.project.sistema_ventas_api.repository.CategoriaRepository;
 import com.project.sistema_ventas_api.repository.ProductoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,25 +34,31 @@ public class ProductoService {
     @Transactional
     public ProductoResponseDTO nuevoProducto(ProductoRequestDTO requestDTO)
     {
-        Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+        Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
 
         Producto nuevoProducto = productoMapper.toEntity(requestDTO);
         nuevoProducto.setCategoria(categoriaEncontrada);
-
+d 
         return productoMapper.toDto(productoRepository.save(nuevoProducto));
     }
 
     @Transactional(readOnly = true)
-    public List<ProductoResponseDTO> listarProductos()
+    public Page<ProductoResponseDTO> listarProductos(int page, int size)
     {
-        return  productoMapper.toDtoList(productoRepository.findAll());
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Producto> paginaProductos = productoRepository.findAllByActivo(true, pageable);
+
+        return paginaProductos.map(producto -> productoMapper.toDto(producto));
     }
 
     @Transactional
     public void eliminarProducto(UUID id)
     {
-        productoRepository.findById(id.toString()).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-        productoRepository.deleteById(id.toString());
+        Producto productoEncontrado = productoRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado"));
+        //productoRepository.deleteById(id.toString());
+
+        productoEncontrado.setActivo(false);
     }
 
     @Transactional
@@ -56,7 +66,7 @@ public class ProductoService {
     {
         Producto productoEncontrado = productoRepository.findById(id.toString()).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+        Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
         productoEncontrado.setNombre(requestDTO.getNombre());
         productoEncontrado.setPrecio(requestDTO.getPrecio());
         productoEncontrado.setStock(requestDTO.getStock());
