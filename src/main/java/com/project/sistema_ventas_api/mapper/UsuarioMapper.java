@@ -6,6 +6,8 @@ import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioResponseDTO;
 import com.project.sistema_ventas_api.entity.Usuario;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UsuarioMapper {
 
@@ -14,4 +16,6 @@ public interface UsuarioMapper {
 
     //Convertimos la entrada a dto
     Usuario toEntity(UsuarioRequestDTO requestDTO);
+
+    List<UsuarioResponseDTO> toDtoList(List<Usuario> usuarios);
 }

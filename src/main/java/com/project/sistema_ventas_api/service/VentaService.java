@@ -89,7 +89,7 @@ public class VentaService {
         //solicitud de paginacion
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Venta> paginaVentas = ventaRepository.findAll(pageable);
+        Page<Venta> paginaVentas = ventaRepository.findAllByActivo(true, pageable);
 
         return paginaVentas.map(venta -> {
             VentaResponseDTO dto = ventaMapper.toDto(venta);

@@ -34,7 +34,7 @@ public class ProductoService {
     @Transactional
     public ProductoResponseDTO nuevoProducto(ProductoRequestDTO requestDTO)
     {
-        Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
+        Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
 
         Producto nuevoProducto = productoMapper.toEntity(requestDTO);
         nuevoProducto.setCategoria(categoriaEncontrada);

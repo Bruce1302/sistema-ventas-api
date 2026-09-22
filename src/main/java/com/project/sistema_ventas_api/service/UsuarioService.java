@@ -1,0 +1,55 @@
+package com.project.sistema_ventas_api.service;
+
+import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioRequestDTO;
+import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioResponseDTO;
+import com.project.sistema_ventas_api.entity.Usuario;
+import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
+import com.project.sistema_ventas_api.mapper.UsuarioMapper;
+import com.project.sistema_ventas_api.repository.UsuarioRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.stylesheets.LinkStyle;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class UsuarioService {
+
+    private final UsuarioRepository usuarioRepository;
+    private final UsuarioMapper usuarioMapper;
+
+
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper)
+    {
+        this.usuarioRepository = usuarioRepository;
+        this.usuarioMapper = usuarioMapper;
+    }
+
+    @Transactional
+    public UsuarioResponseDTO nuevoUsuario(UsuarioRequestDTO requestDTO)
+    {
+        return usuarioMapper.toDto(usuarioRepository.save(usuarioMapper.toEntity(requestDTO)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> listarUsuarios()
+    {
+        return  usuarioMapper.toDtoList(usuarioRepository.findAllByActivo(true));
+    }
+
+    @Transactional(readOnly = true)
+    public UsuarioResponseDTO buscarUsuarioPorId(UUID id)
+    {
+        return usuarioMapper.toDto(usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado")));
+    }
+
+    @Transactional
+    public void eliminarUsuario(UUID id)
+    {
+        Usuario usuarioEncontrado =  usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        usuarioEncontrado.setActivo(false);
+        usuarioRepository.save(usuarioEncontrado);
+    }
+}
