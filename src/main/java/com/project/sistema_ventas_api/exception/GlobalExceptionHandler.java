@@ -2,6 +2,7 @@ package com.project.sistema_ventas_api.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -35,6 +36,16 @@ public class GlobalExceptionHandler {
 
         // Retornamos el JSON con el código HTTP 404 (Not Found)
         return new ResponseEntity<>(respuesta, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> manejarCredencialesInvalidas(BadCredentialsException ex)
+    {
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("status", 401);
+        respuesta.put("timestamp", java.time.LocalDateTime.now());
+        respuesta.put("error", "Usuario o contraseña incorrectos");
+        return new ResponseEntity<>(respuesta, HttpStatus.UNAUTHORIZED);
     }
 
 }
