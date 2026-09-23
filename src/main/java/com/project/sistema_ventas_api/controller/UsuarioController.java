@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.controller;
 import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioRequestDTO;
 import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioResponseDTO;
 import com.project.sistema_ventas_api.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public UsuarioResponseDTO nuevoUsuario(@RequestBody UsuarioRequestDTO requestDTO)
+    public UsuarioResponseDTO nuevoUsuario( @Valid @RequestBody UsuarioRequestDTO requestDTO)
     {
        return usuarioService.nuevoUsuario(requestDTO);
     }
@@ -35,5 +36,11 @@ public class UsuarioController {
     public void eliminarUsuario(@PathVariable UUID id)
     {
         usuarioService.eliminarUsuario(id);
+    }
+
+    @PutMapping("{id}")
+    public UsuarioResponseDTO actualizarUsuario (@Valid @RequestBody UsuarioRequestDTO requestDTO, @PathVariable UUID id)
+    {
+        return usuarioService.actualizarUsuario(requestDTO, id);
     }
 }

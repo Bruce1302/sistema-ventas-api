@@ -41,6 +41,7 @@ public class VentaService {
         Venta venta = new Venta();
 
         BigDecimal total = BigDecimal.ZERO;
+        int cantidadProductosVendidos = 0;
 
         //Obtenemos los productos que el cliente quiere comprar
         List<DetalleVenta> detallesVenta = ventaMapper.toEntity(requestDTO).getDetalles();
@@ -65,6 +66,8 @@ public class VentaService {
             detalleVenta.setSubTotal(subTotal); //guardamos el subtotal
             detalleVenta.setVenta(venta); //Anclamos la venta a sus detalles
 
+            cantidadProductosVendidos += detalleVenta.getCantidad();
+
             productoEncontrado.setStock(productoEncontrado.getStock() - detalleVenta.getCantidad()); //Descontamos lo vendido al stock
 
             detallesAceptados.add(detalleVenta); //Guardamos los detalles
@@ -75,12 +78,17 @@ public class VentaService {
         venta.setTotal(total);
         venta.setDetalles(detallesAceptados);
 
+        //Guardamos la venta y recibimos el response
+        VentaResponseDTO dto = ventaMapper.toDto(ventaRepository.save(venta));
+
+        //LLenamos el dato faltante
+        dto.setCantidadProductosVendidos(cantidadProductosVendidos);
+
         //No se necesita hacer un update al producto, jpa lo guarda automaticamente
 
         //NO se necesita guardar manualmente los detalles en la bd, al haber una relacion en las entidades, se hace automaticamente
 
-        //Guardamos la venta
-        return ventaMapper.toDto(ventaRepository.save(venta));
+        return dto;
     }
 
     @Transactional(readOnly = true)

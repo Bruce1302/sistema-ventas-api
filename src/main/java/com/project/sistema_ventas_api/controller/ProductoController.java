@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.controller;
 import com.project.sistema_ventas_api.dto.productoDTO.ProductoRequestDTO;
 import com.project.sistema_ventas_api.dto.productoDTO.ProductoResponseDTO;
 import com.project.sistema_ventas_api.service.ProductoService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,12 +16,14 @@ public class ProductoController {
 
     private final ProductoService productoService;
 
-    public ProductoController(ProductoService productoService) {
+    public ProductoController(ProductoService productoService)
+    {
         this.productoService = productoService;
     }
 
     @PostMapping()
-    public ProductoResponseDTO nuevoProducto(@RequestBody ProductoRequestDTO requestDTO) {
+    public ProductoResponseDTO nuevoProducto( @Valid @RequestBody ProductoRequestDTO requestDTO)
+    {
         return productoService.nuevoProducto(requestDTO);
     }
 
@@ -37,7 +40,7 @@ public class ProductoController {
     }
 
     @PutMapping("/{id}")
-    public ProductoResponseDTO actualizarProducto(@RequestBody ProductoRequestDTO requestDTO, @PathVariable UUID id)
+    public ProductoResponseDTO actualizarProducto( @Valid @RequestBody ProductoRequestDTO requestDTO, @PathVariable UUID id)
     {
         return productoService.actualizarProducto(id, requestDTO);
     }

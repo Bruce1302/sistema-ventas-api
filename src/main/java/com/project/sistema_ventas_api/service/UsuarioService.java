@@ -52,4 +52,18 @@ public class UsuarioService {
         usuarioEncontrado.setActivo(false);
         usuarioRepository.save(usuarioEncontrado);
     }
+
+    @Transactional
+    public UsuarioResponseDTO actualizarUsuario(UsuarioRequestDTO requestDTO, UUID id)
+    {
+        Usuario usuarioEncontrado = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        usuarioEncontrado.setUsername(requestDTO.getUsername());
+        usuarioEncontrado.setPassword(requestDTO.getPassword());
+        usuarioEncontrado.setRol(requestDTO.getRol());
+
+        usuarioRepository.save(usuarioEncontrado);
+
+        return usuarioMapper.toDto(usuarioEncontrado);
+    }
 }

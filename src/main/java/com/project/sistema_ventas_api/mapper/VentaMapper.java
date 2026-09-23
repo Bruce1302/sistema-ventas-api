@@ -15,6 +15,7 @@ import java.util.List;
 public interface VentaMapper {
 
     @Mapping(target = "cantidadProductosVendidos", ignore = true)
+    @Mapping(source = "fechaCreacion", target = "fechaVenta")
     VentaResponseDTO toDto(Venta venta);
 
     Venta toEntity(VentaRequestDTO resquestDTO);

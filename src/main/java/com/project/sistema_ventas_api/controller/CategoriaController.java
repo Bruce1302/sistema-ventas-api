@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.controller;
 import com.project.sistema_ventas_api.dto.categoriaDTO.CategoriaRequestDTO;
 import com.project.sistema_ventas_api.dto.categoriaDTO.CategoriaResponseDTO;
 import com.project.sistema_ventas_api.service.CategoriaService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public CategoriaResponseDTO nuevaCategoria(@RequestBody CategoriaRequestDTO requestDTO)
+    public CategoriaResponseDTO nuevaCategoria( @Valid @RequestBody CategoriaRequestDTO requestDTO)
     {
        return categoriaService.nuevaCategoria(requestDTO);
     }
@@ -38,7 +39,7 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
-    public CategoriaResponseDTO actualizarCategoria(@RequestBody CategoriaRequestDTO requestDTO, @PathVariable UUID id)
+    public CategoriaResponseDTO actualizarCategoria( @Valid @RequestBody CategoriaRequestDTO requestDTO, @PathVariable UUID id)
     {
         return categoriaService.actualizarCategoria(requestDTO, id);
     }

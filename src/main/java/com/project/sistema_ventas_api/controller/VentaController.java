@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.controller;
 import com.project.sistema_ventas_api.dto.ventaDTO.VentaRequestDTO;
 import com.project.sistema_ventas_api.dto.ventaDTO.VentaResponseDTO;
 import com.project.sistema_ventas_api.service.VentaService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,9 @@ public class VentaController {
     }
 
     @PostMapping()
-    public void nuevaVenta(@RequestBody VentaRequestDTO requestDTO)
+    public VentaResponseDTO nuevaVenta(@Valid @RequestBody VentaRequestDTO requestDTO)
     {
-        ventaService.registrarVenta(requestDTO);
+        return ventaService.registrarVenta(requestDTO);
     }
 
     @GetMapping()
@@ -39,7 +40,7 @@ public class VentaController {
     }
 
     @PutMapping("/{id}")
-    public VentaResponseDTO actualizarVenta(@RequestBody VentaRequestDTO requestDTO, @PathVariable UUID id)
+    public VentaResponseDTO actualizarVenta(@Valid @RequestBody VentaRequestDTO requestDTO, @PathVariable UUID id)
     {
         return ventaService.actualizarVenta(id, requestDTO);
     }
