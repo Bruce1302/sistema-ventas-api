@@ -34,18 +34,17 @@ public class SecurityConfig {
                         //Reglas operativas
                         .requestMatchers(HttpMethod.POST, "/ventas/**").hasAnyRole("ADMIN", "CAJERO")
                         .requestMatchers(HttpMethod.GET, "/ventas/**").hasAnyRole("ADMIN", "CAJERO")
+                        .requestMatchers(HttpMethod.POST, "/productos/**", "/categorias/**").hasAnyRole("ADMIN", "CAJERO")
 
                         //Operaciones administrativas
-                        .requestMatchers(HttpMethod.POST, "/productos/**", "/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,"/productos/**", "/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/productos/**", "/categorias/**").hasRole("ADMIN")
 
-                        //Ambos pueden ver los proudctos y categorias
+                        //Ambos pueden ver los productos y categorias
                         .requestMatchers(HttpMethod.GET, "/productos/**", "/categorias/**").hasAnyRole("ADMIN", "CAJERO")
 
                         //Solo admin controla los usuarios
                         .requestMatchers("/usuarios/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
 
                 )

@@ -15,6 +15,7 @@ public class Usuario extends AuditoriaBase{
     private String id;
 
     @NotBlank
+    @Column(unique = true)
     private String username;
 
     @NotBlank

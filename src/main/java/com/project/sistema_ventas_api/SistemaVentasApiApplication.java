@@ -23,15 +23,15 @@ public class SistemaVentasApiApplication {
 //    @Bean
 //    public CommandLineRunner initAdmin(UsuarioRepository repository, PasswordEncoder passwordEncoder){
 //		return args -> {
-//			// Evitamos duplicar al usuario cada vez que reinicias el servidor
+//			//Creamos el primer usuario
 //			if (repository.findByUsername("admin").isEmpty())
 //			{
 //				Usuario admin = new Usuario();
 //				admin.setUsername("admin");
-//				admin.setPassword(passwordEncoder.encode("admin123")); // Encriptación en tiempo real
-//				admin.setRol(RolUsuario.ADMIN); // Asigna tu Enum aquí según cómo lo llamaste en la Fase 1
+//				admin.setPassword(passwordEncoder.encode("admin123")); // Encriptaciom
+//				admin.setRol(RolUsuario.ADMIN); // Le ponemos un rol
 //				repository.save(admin);
-//				System.out.println("¡Usuario ADMIN generado con éxito en MariaDB!");
+//				System.out.println("Usuario ADMIN generado con exito");
 //			}
 //		};
 //	}

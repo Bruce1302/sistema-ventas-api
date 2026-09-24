@@ -6,9 +6,9 @@ import com.project.sistema_ventas_api.entity.Usuario;
 import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.UsuarioMapper;
 import com.project.sistema_ventas_api.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,18 +18,26 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final PasswordEncoder passwordEncoder;
 
-
-    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper)
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper, PasswordEncoder passwordEncoder)
     {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
     public UsuarioResponseDTO nuevoUsuario(UsuarioRequestDTO requestDTO)
     {
-        return usuarioMapper.toDto(usuarioRepository.save(usuarioMapper.toEntity(requestDTO)));
+        //Buscamos el username para no duplicarlo
+        if (usuarioRepository.findByUsername(requestDTO.getUsername()).isPresent())
+            throw new IllegalArgumentException("El username '" + requestDTO.getUsername() + "' ya está en uso. Elige otro.");
+
+        Usuario usuario = usuarioMapper.toEntity(requestDTO);
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword())); //Encriptamos la contraseña antes de gaurdar
+
+        return usuarioMapper.toDto(usuarioRepository.save(usuario));
     }
 
     @Transactional(readOnly = true)
