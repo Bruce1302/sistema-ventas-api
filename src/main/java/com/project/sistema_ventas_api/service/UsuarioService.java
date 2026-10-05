@@ -43,7 +43,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> listarUsuarios()
     {
-        return  usuarioMapper.toDtoList(usuarioRepository.findAllByActivo(true));
+        return  usuarioMapper.toDtoList(usuarioRepository.findAll());
     }
 
     @Transactional(readOnly = true)

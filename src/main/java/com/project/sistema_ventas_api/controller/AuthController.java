@@ -49,7 +49,7 @@ public class AuthController {
         AuthResponseDTO response = new AuthResponseDTO();
 
         response.setToken(jwtToken);
-
+        
         return ResponseEntity.ok(response);
 
     }

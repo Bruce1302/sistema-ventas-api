@@ -30,7 +30,7 @@ public class ApplicationConfig {
     {
         return username ->
         {
-            var usuario = usuarioRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            var usuario = usuarioRepository.findByUsernameAndActivo(username, true).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o usuario sin acceso"));
 
             return new org.springframework.security.core.userdetails.User(
                     usuario.getUsername(),

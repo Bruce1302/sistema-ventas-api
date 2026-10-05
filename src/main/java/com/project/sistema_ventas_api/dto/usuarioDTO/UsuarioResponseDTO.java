@@ -9,4 +9,6 @@ public class UsuarioResponseDTO {
     private String id;
     private String username;
     private RolUsuario rol;
+
+    private boolean activo;
 }
