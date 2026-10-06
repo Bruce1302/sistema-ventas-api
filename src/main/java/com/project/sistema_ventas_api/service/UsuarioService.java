@@ -30,6 +30,10 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO nuevoUsuario(UsuarioRequestDTO requestDTO)
     {
+        // Validamos manualmente que el pasword tenga contenido
+        if (requestDTO.getPassword() == null || requestDTO.getPassword().trim().isEmpty())
+            throw new IllegalArgumentException("La contraseña es obligatoria para usuarios nuevos");
+
         //Buscamos el username para no duplicarlo
         if (usuarioRepository.findByUsername(requestDTO.getUsername()).isPresent())
             throw new IllegalArgumentException("El username '" + requestDTO.getUsername() + "' ya está en uso. Elige otro.");
@@ -66,9 +70,14 @@ public class UsuarioService {
     {
         Usuario usuarioEncontrado = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
+        //actualizaos los datos
         usuarioEncontrado.setUsername(requestDTO.getUsername());
-        usuarioEncontrado.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         usuarioEncontrado.setRol(requestDTO.getRol());
+
+        //si es que se ingresa una contraseña tambien se actualiza, pero si esta vacia, solo se cambian los campos llenos
+        if (requestDTO.getPassword() != null && !requestDTO.getPassword().trim().isEmpty())
+            usuarioEncontrado.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
+
 
         usuarioRepository.save(usuarioEncontrado);
 
