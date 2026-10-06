@@ -38,6 +38,12 @@ public class UsuarioController {
         usuarioService.eliminarUsuario(id);
     }
 
+    @DeleteMapping("/{id}/hard")
+    public void destruirUsuario(@PathVariable UUID id)
+    {
+        usuarioService.destruirUsuario(id);
+    }
+
     @PutMapping("{id}")
     public UsuarioResponseDTO actualizarUsuario (@Valid @RequestBody UsuarioRequestDTO requestDTO, @PathVariable UUID id)
     {

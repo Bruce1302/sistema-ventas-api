@@ -74,4 +74,14 @@ public class UsuarioService {
 
         return usuarioMapper.toDto(usuarioEncontrado);
     }
+
+    @Transactional
+    public void destruirUsuario(UUID id)
+    {
+        //validamos si el usuario existe
+        Usuario usuario = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        //eliminamos
+        usuarioRepository.delete(usuario);
+    }
 }
