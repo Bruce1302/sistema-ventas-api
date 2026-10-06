@@ -35,7 +35,7 @@ public class UsuarioService {
             throw new IllegalArgumentException("El username '" + requestDTO.getUsername() + "' ya está en uso. Elige otro.");
 
         Usuario usuario = usuarioMapper.toEntity(requestDTO);
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword())); //Encriptamos la contraseña antes de gaurdar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword())); //Encriptamos la contraseña antes de guardar
 
         return usuarioMapper.toDto(usuarioRepository.save(usuario));
     }
@@ -67,7 +67,7 @@ public class UsuarioService {
         Usuario usuarioEncontrado = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         usuarioEncontrado.setUsername(requestDTO.getUsername());
-        usuarioEncontrado.setPassword(requestDTO.getPassword());
+        usuarioEncontrado.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         usuarioEncontrado.setRol(requestDTO.getRol());
 
         usuarioRepository.save(usuarioEncontrado);
