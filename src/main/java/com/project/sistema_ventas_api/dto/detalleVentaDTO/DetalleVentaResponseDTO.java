@@ -9,6 +9,7 @@ public class DetalleVentaResponseDTO {
 
     private String id;
     private String productoId;
+    private String productoNombre;
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;

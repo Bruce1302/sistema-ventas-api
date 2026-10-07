@@ -10,8 +10,10 @@ import org.mapstruct.Mapping;
 public interface DetalleVentaMapper {
 
     @Mapping(source = "producto.id", target = "productoId")
+    @Mapping(source = "producto.nombre", target = "productoNombre")
     DetalleVentaResponseDTO toDto(DetalleVenta detalleVenta);
 
     @Mapping(source = "productoId", target = "producto.id")
     DetalleVenta toEntity(DetalleVentaRequestDTO requestDTO);
+
 }
