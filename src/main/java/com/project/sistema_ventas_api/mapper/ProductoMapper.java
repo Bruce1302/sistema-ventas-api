@@ -14,6 +14,7 @@ import java.util.List;
 public interface ProductoMapper {
 
     @Mapping(source = "categoria.id", target = "categoriaId") //En
+    @Mapping(source = "categoria.nombre", target = "categoriaNombre")
     ProductoResponseDTO toDto(Producto producto);
 
     @Mapping(source = "categoriaId", target = "categoria.id")
