@@ -76,6 +76,18 @@ public class ProductoService {
 
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductoResponseDTO> listarProductosMasVendidos()
+    {
+        //devolveremos los 15 productos más vendidos
+        Pageable top15 = PageRequest.of(0, 15);
+
+        List<Producto> productos = productoRepository.findTopProductosMasVendidos(top15);
+
+        return productoMapper.toDtoList(productos);
+
+    }
+
 
 
 }

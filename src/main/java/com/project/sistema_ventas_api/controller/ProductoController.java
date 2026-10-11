@@ -44,4 +44,10 @@ public class ProductoController {
     {
         return productoService.actualizarProducto(id, requestDTO);
     }
+
+    @GetMapping("/top")
+    public List<ProductoResponseDTO> listarProductosMasVendidos()
+    {
+        return productoService.listarProductosMasVendidos();
+    }
 }
