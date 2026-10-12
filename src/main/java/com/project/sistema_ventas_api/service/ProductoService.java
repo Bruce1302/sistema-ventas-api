@@ -88,6 +88,13 @@ public class ProductoService {
 
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductoResponseDTO> buscarProductoPorNombre(String nombre)
+    {
+        List<Producto> coincidencias = productoRepository.findByNombreContainingIgnoreCase(nombre);
+
+        return productoMapper.toDtoList(coincidencias);
+    }
 
 
 }

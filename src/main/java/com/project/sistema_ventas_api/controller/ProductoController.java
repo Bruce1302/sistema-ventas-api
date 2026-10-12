@@ -50,4 +50,10 @@ public class ProductoController {
     {
         return productoService.listarProductosMasVendidos();
     }
+
+    @GetMapping("/buscar")
+    public List<ProductoResponseDTO> buscarProductoPorNombre(@RequestParam String nombre)
+    {
+        return productoService.buscarProductoPorNombre(nombre);
+    }
 }
