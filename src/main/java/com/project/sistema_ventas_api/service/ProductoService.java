@@ -89,11 +89,13 @@ public class ProductoService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductoResponseDTO> buscarProductoPorNombre(String nombre)
+    public Page<ProductoResponseDTO> buscarProductoPorNombre(String nombre, int page, int size)
     {
-        List<Producto> coincidencias = productoRepository.findByNombreContainingIgnoreCase(nombre);
+        Pageable pageable = PageRequest.of(page, size);
 
-        return productoMapper.toDtoList(coincidencias);
+        Page<Producto> coincidencias = productoRepository.findByNombreContainingIgnoreCase(nombre, pageable);
+
+        return coincidencias.map(productoMapper::toDto);
     }
 
 

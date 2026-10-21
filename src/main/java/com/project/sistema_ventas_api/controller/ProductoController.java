@@ -51,9 +51,9 @@ public class ProductoController {
         return productoService.listarProductosMasVendidos();
     }
 
-    @GetMapping("/buscar")
-    public List<ProductoResponseDTO> buscarProductoPorNombre(@RequestParam String nombre)
+    @GetMapping("/buscar") //limitamos la busqueda a 12 resultados
+    public Page<ProductoResponseDTO> buscarProductoPorNombre(@RequestParam String nombre, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size)
     {
-        return productoService.buscarProductoPorNombre(nombre);
+        return productoService.buscarProductoPorNombre(nombre, page, size);
     }
 }
