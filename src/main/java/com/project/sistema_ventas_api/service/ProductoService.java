@@ -93,7 +93,7 @@ public class ProductoService {
     {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Producto> coincidencias = productoRepository.findByNombreContainingIgnoreCase(nombre, pageable);
+        Page<Producto> coincidencias = productoRepository.findByNombreContainingIgnoreCaseAndActivo(nombre, true, pageable);
 
         return coincidencias.map(productoMapper::toDto);
     }

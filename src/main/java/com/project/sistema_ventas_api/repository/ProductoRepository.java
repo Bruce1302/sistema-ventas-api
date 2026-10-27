@@ -15,5 +15,5 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
     @Query("SELECT d.producto FROM DetalleVenta d GROUP BY d.producto ORDER BY SUM(d.cantidad) DESC")
     List<Producto> findTopProductosMasVendidos(Pageable pageable);
 
-    Page<Producto> findByNombreContainingIgnoreCase(String nombre, Pageable pageable);
+    Page<Producto> findByNombreContainingIgnoreCaseAndActivo(String nombre, Boolean estado, Pageable pageable);
 }
