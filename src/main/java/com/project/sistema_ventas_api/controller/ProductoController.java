@@ -56,4 +56,13 @@ public class ProductoController {
     {
         return productoService.buscarProductoPorNombre(nombre, page, size);
     }
+
+    @GetMapping("/filtrar")
+    public Page<ProductoResponseDTO> filtrar(
+            @RequestParam(required = false) List<String> categorias,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return productoService.filtrarCategoria(categorias, page, size);
+    }
 }

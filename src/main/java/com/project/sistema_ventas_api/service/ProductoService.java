@@ -8,12 +8,14 @@ import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.ProductoMapper;
 import com.project.sistema_ventas_api.repository.CategoriaRepository;
 import com.project.sistema_ventas_api.repository.ProductoRepository;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,6 +96,24 @@ public class ProductoService {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Producto> coincidencias = productoRepository.findByNombreContainingIgnoreCaseAndActivo(nombre, true, pageable);
+
+        return coincidencias.map(productoMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductoResponseDTO> filtrarCategoria(Collection<String> categorias, int page, int size)
+    {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Producto> coincidencias;
+
+        // Si la lista viene nula o vacia (el usuario no ha seleccionado ningún filtro)
+        if (categorias == null || categorias.isEmpty())
+            coincidencias = productoRepository.findAllByActivo(true, pageable); // devolvemos todos los productos
+        else
+            //De lo contrario hacemos el filtro de esas categorias
+            coincidencias = productoRepository.findByCategoria_IdInAndActivo(categorias, true, pageable);
+
 
         return coincidencias.map(productoMapper::toDto);
     }

@@ -18,6 +18,5 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
 
     Page<Producto> findByNombreContainingIgnoreCaseAndActivo(String nombre, Boolean estado, Pageable pageable);
 
-    //filtros por categoria
-    Page<Producto> findByCategoria_IdIn(Collection<String> categoriaIds, Pageable pageable);
+    Page<Producto> findByCategoria_IdInAndActivo(Collection<String> categoriaIds, Boolean activo, Pageable pageable);
 }
