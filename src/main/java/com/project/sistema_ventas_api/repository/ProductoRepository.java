@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ProductoRepository extends JpaRepository<Producto, String> {
@@ -16,4 +17,7 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
     List<Producto> findTopProductosMasVendidos(Pageable pageable);
 
     Page<Producto> findByNombreContainingIgnoreCaseAndActivo(String nombre, Boolean estado, Pageable pageable);
+
+    //filtros por categoria
+    Page<Producto> findByCategoria_IdIn(Collection<String> categoriaIds, Pageable pageable);
 }
