@@ -5,8 +5,10 @@ import com.project.sistema_ventas_api.dto.ventaDTO.VentaResponseDTO;
 import com.project.sistema_ventas_api.service.VentaService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,5 +51,14 @@ public class VentaController {
     public VentaResponseDTO buscarVentaPorId(@PathVariable UUID id)
     {
         return ventaService.buscarVentaPorId(id);
+    }
+
+    @GetMapping("/filtrar")
+    public Page<VentaResponseDTO> filtrarVentasPorFecha(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
+                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size)
+    {
+        return ventaService.filtrarVentasPorFecha(fechaInicio, fechaFin, page, size);
     }
 }

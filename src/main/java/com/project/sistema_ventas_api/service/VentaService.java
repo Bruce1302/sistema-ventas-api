@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -133,5 +134,23 @@ public class VentaService {
         dto.setCantidadProductosVendidos(venta.getDetalles().size());
 
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<VentaResponseDTO> filtrarVentasPorFecha(LocalDateTime fechaInicio, LocalDateTime fechaFin, int page, int size)
+    {
+        if (fechaInicio == null || fechaFin == null)
+            return listarVentas(0, 10);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Venta> ventasEncontradas = ventaRepository.findByFechaCreacionBetween(fechaInicio, fechaFin, pageable);
+
+        return ventasEncontradas.map(venta -> {
+            VentaResponseDTO dto = ventaMapper.toDto(venta);
+            dto.setCantidadProductosVendidos(venta.getDetalles().size());
+            return dto;
+        });
+
     }
 }
