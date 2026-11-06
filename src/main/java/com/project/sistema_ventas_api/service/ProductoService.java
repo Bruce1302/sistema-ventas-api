@@ -70,6 +70,7 @@ public class ProductoService {
 
         Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
         productoEncontrado.setNombre(requestDTO.getNombre());
+        productoEncontrado.setCodigo(requestDTO.getCodigo());
         productoEncontrado.setPrecio(requestDTO.getPrecio());
         productoEncontrado.setStock(requestDTO.getStock());
         productoEncontrado.setCategoria(categoriaEncontrada);
