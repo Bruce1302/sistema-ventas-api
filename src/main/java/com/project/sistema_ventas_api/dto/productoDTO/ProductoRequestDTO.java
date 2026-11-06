@@ -17,6 +17,9 @@ public class ProductoRequestDTO {
     @NotBlank
     private String categoriaId;
 
+    @NotBlank
+    private String codigo;
+
     @NotNull
     @Positive
     private BigDecimal precio;

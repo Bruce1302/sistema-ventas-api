@@ -19,6 +19,9 @@ public class Producto  extends AuditoriaBase{
     @NotBlank
     private String nombre;
 
+    @NotBlank
+    private String codigo;
+
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;

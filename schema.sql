@@ -26,6 +26,7 @@ CREATE TABLE usuario (
 CREATE TABLE producto (
     id VARCHAR(255) PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
+    codigo VARCHAR(50) NOT NULL,
     precio DECIMAL(19,2) NOT NULL,
     stock INT NOT NULL,
     categoria_id VARCHAR(255),

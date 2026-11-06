@@ -9,6 +9,7 @@ public class ProductoResponseDTO {
 
     private String id;
     private String nombre;
+    private String codigo;
     private String categoriaId; //Categoria objeto
     private String categoriaNombre;
     private BigDecimal precio;
