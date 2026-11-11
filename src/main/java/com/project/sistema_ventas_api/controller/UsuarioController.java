@@ -44,6 +44,12 @@ public class UsuarioController {
         usuarioService.destruirUsuario(id);
     }
 
+    @PatchMapping("/{id}/activar")
+    public void activarUsuario(@PathVariable UUID id)
+    {
+        usuarioService.activarUsuario(id);
+    }
+
     @PutMapping("{id}")
     public UsuarioResponseDTO actualizarUsuario (@Valid @RequestBody UsuarioRequestDTO requestDTO, @PathVariable UUID id)
     {

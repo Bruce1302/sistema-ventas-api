@@ -66,6 +66,15 @@ public class UsuarioService {
     }
 
     @Transactional
+    public void activarUsuario(UUID id)
+    {
+        Usuario usuarioEncontrado =  usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        usuarioEncontrado.setActivo(true);
+        usuarioRepository.save(usuarioEncontrado);
+    }
+
+    @Transactional
     public UsuarioResponseDTO actualizarUsuario(UsuarioRequestDTO requestDTO, UUID id)
     {
         Usuario usuarioEncontrado = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
