@@ -23,11 +23,12 @@ public class JwtUtil {
     }
 
     //Creamos el token y le pasamos los datos del usuario
-    public String generarToken(String username, String rol)
+    public String generarToken(String username, String rol, String tiendaId)
     {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("rol", rol)
+                .claim("tiendaId", tiendaId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey())
@@ -43,6 +44,16 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String obtenerTiendaID(String token)
+    {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("tiendaId").toString();
     }
 
     //Verificamos validez del token
