@@ -3,12 +3,10 @@ package com.project.sistema_ventas_api.controller;
 import com.project.sistema_ventas_api.dto.tiendaDTO.TiendaRequestDTO;
 import com.project.sistema_ventas_api.dto.tiendaDTO.TiendaResponseDTO;
 import com.project.sistema_ventas_api.service.TiendaService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/tienda")
@@ -24,7 +22,7 @@ public class TiendaController {
     @PostMapping
     public TiendaResponseDTO nuevaTienda(TiendaRequestDTO requestDTO)
     {
-        tiendaService.nuevaTienda(requestDTO);
+        return tiendaService.nuevaTienda(requestDTO);
     }
 
     @GetMapping
@@ -33,5 +31,10 @@ public class TiendaController {
         return tiendaService.listarTiendas();
     }
 
+    @DeleteMapping
+    public void eliminarTienda(@PathVariable UUID id)
+    {
+        tiendaService.eliminarTienda(id);
+    }
 
 }

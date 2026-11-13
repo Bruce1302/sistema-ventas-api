@@ -5,11 +5,13 @@ import com.project.sistema_ventas_api.dto.tiendaDTO.TiendaResponseDTO;
 import com.project.sistema_ventas_api.entity.Tienda;
 import com.project.sistema_ventas_api.mapper.TiendaMapper;
 import com.project.sistema_ventas_api.repository.TiendaRepository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class TiendaService {
 
     private final TiendaRepository tiendaRepository;
