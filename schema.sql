@@ -71,6 +71,7 @@ CREATE TABLE detalle_venta (
 CREATE TABLE tienda (
     id VARCHAR(255) PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
+    codigo VARCHAR(255) NOT NULL UNIQUE,
     direccion VARCHAR(255) NOT NULL,
     telefono VARCHAR(255),
     activo TINYINT(1) DEFAULT 1,
