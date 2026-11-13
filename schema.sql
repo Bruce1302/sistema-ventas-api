@@ -8,7 +8,8 @@ CREATE TABLE categoria (
     nombre VARCHAR(255) NOT NULL,
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME(6),
-    fecha_actualizacion DATETIME(6)
+    fecha_actualizacion DATETIME(6),
+    CONSTRAINT fk_categoria_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
 );
 
 -- 2. Tabla Usuario
@@ -19,7 +20,8 @@ CREATE TABLE usuario (
     rol VARCHAR(50) NOT NULL,
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME(6),
-    fecha_actualizacion DATETIME(6)
+    fecha_actualizacion DATETIME(6),
+    CONSTRAINT fk_usuario_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
 );
 
 -- 3. Tabla Producto
@@ -33,7 +35,8 @@ CREATE TABLE producto (
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME(6),
     fecha_actualizacion DATETIME(6),
-    CONSTRAINT fk_producto_categoria FOREIGN KEY (categoria_id) REFERENCES categoria (id)
+    CONSTRAINT fk_producto_categoria FOREIGN KEY (categoria_id) REFERENCES categoria (id),
+    CONSTRAINT fk_producto_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
 );
 
 -- 4. Tabla Venta
@@ -42,7 +45,9 @@ CREATE TABLE venta (
     total DECIMAL(19,2) NOT NULL,
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME(6),
-    fecha_actualizacion DATETIME(6)
+    fecha_actualizacion DATETIME(6),
+    CONSTRAINT fk_venta_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
+
 );
 
 -- 5. Tabla Detalle Venta
@@ -57,5 +62,20 @@ CREATE TABLE detalle_venta (
     fecha_creacion DATETIME(6),
     fecha_actualizacion DATETIME(6),
     CONSTRAINT fk_detalle_venta FOREIGN KEY (venta_id) REFERENCES venta (id),
-    CONSTRAINT fk_detalle_producto FOREIGN KEY (producto_id) REFERENCES producto (id)
+    CONSTRAINT fk_detalle_producto FOREIGN KEY (producto_id) REFERENCES producto (id),
+    CONSTRAINT fk_detalle_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
+
 );
+
+-- 5. Tabla Detalle Venta
+CREATE TABLE tienda (
+    id VARCHAR(255) PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(255),
+    activo TINYINT(1) DEFAULT 1,
+    fecha_creacion DATETIME(6),
+    fecha_actualizacion DATETIME(6)
+);
+
+
