@@ -2,10 +2,13 @@ package com.project.sistema_ventas_api.service;
 
 import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioRequestDTO;
 import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioResponseDTO;
+import com.project.sistema_ventas_api.entity.Tienda;
 import com.project.sistema_ventas_api.entity.Usuario;
 import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.UsuarioMapper;
+import com.project.sistema_ventas_api.repository.TiendaRepository;
 import com.project.sistema_ventas_api.repository.UsuarioRepository;
+import com.project.sistema_ventas_api.security.TenantContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +22,14 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
+    private final TiendaRepository tiendaRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper, PasswordEncoder passwordEncoder)
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper, PasswordEncoder passwordEncoder, TiendaRepository tiendaRepository)
     {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.passwordEncoder = passwordEncoder;
+        this.tiendaRepository = tiendaRepository;
     }
 
     @Transactional
@@ -38,8 +43,13 @@ public class UsuarioService {
         if (usuarioRepository.findByUsername(requestDTO.getUsername()).isPresent())
             throw new IllegalArgumentException("El username '" + requestDTO.getUsername() + "' ya está en uso. Elige otro.");
 
+        //obtenemos el id de la tienda
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+        Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
+
         Usuario usuario = usuarioMapper.toEntity(requestDTO);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword())); //Encriptamos la contraseña antes de guardar
+        usuario.setTienda(tiendaRef);
 
         return usuarioMapper.toDto(usuarioRepository.save(usuario));
     }

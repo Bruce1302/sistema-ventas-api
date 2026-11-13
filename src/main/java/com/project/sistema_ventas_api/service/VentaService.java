@@ -4,11 +4,14 @@ import com.project.sistema_ventas_api.dto.ventaDTO.VentaRequestDTO;
 import com.project.sistema_ventas_api.dto.ventaDTO.VentaResponseDTO;
 import com.project.sistema_ventas_api.entity.DetalleVenta;
 import com.project.sistema_ventas_api.entity.Producto;
+import com.project.sistema_ventas_api.entity.Tienda;
 import com.project.sistema_ventas_api.entity.Venta;
 import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.VentaMapper;
 import com.project.sistema_ventas_api.repository.ProductoRepository;
+import com.project.sistema_ventas_api.repository.TiendaRepository;
 import com.project.sistema_ventas_api.repository.VentaRepository;
+import com.project.sistema_ventas_api.security.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,17 +30,23 @@ public class VentaService {
     private final VentaRepository ventaRepository;
     private final ProductoRepository productoRepository;
     private final VentaMapper ventaMapper;
+    private final TiendaRepository tiendaRepository;
 
-    public VentaService(VentaRepository ventaRepository, ProductoRepository productoRepository, VentaMapper ventaMapper)
+    public VentaService(VentaRepository ventaRepository, ProductoRepository productoRepository, VentaMapper ventaMapper, TiendaRepository tiendaRepository)
     {
         this.ventaRepository = ventaRepository;
         this.productoRepository = productoRepository;
         this.ventaMapper = ventaMapper;
+        this.tiendaRepository = tiendaRepository;
     }
 
     @Transactional
     public VentaResponseDTO registrarVenta(VentaRequestDTO requestDTO)
     {
+        //Obtenemos el id de la tienda
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+        Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
+
         //Creamos el nuevo registro de venta
         Venta venta = new Venta();
 
@@ -66,6 +75,7 @@ public class VentaService {
             detalleVenta.setPrecioUnitario(productoEncontrado.getPrecio()); //Guardamos el precio unitario
             detalleVenta.setSubTotal(subTotal); //guardamos el subtotal
             detalleVenta.setVenta(venta); //Anclamos la venta a sus detalles
+            detalleVenta.setTienda(tiendaRef);
 
             cantidadProductosVendidos += detalleVenta.getCantidad();
 
@@ -78,6 +88,7 @@ public class VentaService {
         //Guardamos el total y los detalles de la venta realizada
         venta.setTotal(total);
         venta.setDetalles(detallesAceptados);
+        venta.setTienda(tiendaRef);
 
         //Guardamos la venta y recibimos el response
         VentaResponseDTO dto = ventaMapper.toDto(ventaRepository.save(venta));

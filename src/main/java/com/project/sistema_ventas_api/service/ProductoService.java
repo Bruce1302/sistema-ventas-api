@@ -4,10 +4,13 @@ import com.project.sistema_ventas_api.dto.productoDTO.ProductoRequestDTO;
 import com.project.sistema_ventas_api.dto.productoDTO.ProductoResponseDTO;
 import com.project.sistema_ventas_api.entity.Categoria;
 import com.project.sistema_ventas_api.entity.Producto;
+import com.project.sistema_ventas_api.entity.Tienda;
 import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.ProductoMapper;
 import com.project.sistema_ventas_api.repository.CategoriaRepository;
 import com.project.sistema_ventas_api.repository.ProductoRepository;
+import com.project.sistema_ventas_api.repository.TiendaRepository;
+import com.project.sistema_ventas_api.security.TenantContext;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,12 +28,14 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final ProductoMapper productoMapper;
     private final CategoriaRepository categoriaRepository;
+    private final TiendaRepository tiendaRepository;
 
-    public ProductoService(ProductoRepository productoRepository, ProductoMapper productoMapper, CategoriaRepository categoriaRepository)
+    public ProductoService(ProductoRepository productoRepository, ProductoMapper productoMapper, CategoriaRepository categoriaRepository, TiendaRepository tiendaRepository)
     {
         this.productoRepository = productoRepository;
         this.productoMapper = productoMapper;
         this.categoriaRepository = categoriaRepository;
+        this.tiendaRepository = tiendaRepository;
     }
 
     @Transactional
@@ -38,8 +43,15 @@ public class ProductoService {
     {
         Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
 
+        //Obtenemos el id de la tienda
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
+        Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
+
         Producto nuevoProducto = productoMapper.toEntity(requestDTO);
+
         nuevoProducto.setCategoria(categoriaEncontrada);
+        nuevoProducto.setTienda(tiendaRef);
 
         return productoMapper.toDto(productoRepository.save(nuevoProducto));
     }
