@@ -5,6 +5,7 @@ import com.project.sistema_ventas_api.dto.usuarioDTO.UsuarioResponseDTO;
 
 import com.project.sistema_ventas_api.entity.Usuario;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public interface UsuarioMapper {
 
     //Convertimos la salida a dto
+    @Mapping(source = "tienda.id", target = "tiendaId")
     UsuarioResponseDTO toDto(Usuario usuario);
 
     //Convertimos la entrada a dto

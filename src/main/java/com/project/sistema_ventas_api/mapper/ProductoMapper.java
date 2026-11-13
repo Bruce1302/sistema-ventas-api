@@ -15,10 +15,12 @@ public interface ProductoMapper {
 
     @Mapping(source = "categoria.id", target = "categoriaId") //En
     @Mapping(source = "categoria.nombre", target = "categoriaNombre")
+    @Mapping(source = "tienda.id", target = "tiendaId")
     ProductoResponseDTO toDto(Producto producto);
 
     @Mapping(source = "categoriaId", target = "categoria.id")
     Producto toEntity(ProductoRequestDTO resquestDTO);
+
 
      List<ProductoResponseDTO> toDtoList(List<Producto> productos);
 }

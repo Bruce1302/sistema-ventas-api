@@ -16,6 +16,7 @@ public interface VentaMapper {
 
     @Mapping(target = "cantidadProductosVendidos", ignore = true)
     @Mapping(source = "fechaCreacion", target = "fechaVenta")
+    @Mapping(source = "tienda.id", target = "tiendaId")
     VentaResponseDTO toDto(Venta venta);
 
     Venta toEntity(VentaRequestDTO resquestDTO);
