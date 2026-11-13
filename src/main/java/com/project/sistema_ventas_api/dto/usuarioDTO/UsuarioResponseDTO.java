@@ -11,4 +11,5 @@ public class UsuarioResponseDTO {
     private RolUsuario rol;
 
     private boolean activo;
+    private String tiendaId;
 }

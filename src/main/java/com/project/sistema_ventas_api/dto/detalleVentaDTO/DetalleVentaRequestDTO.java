@@ -14,5 +14,6 @@ public class DetalleVentaRequestDTO {
     @NotNull
     @Positive
     private Integer cantidad;
+
 }
 

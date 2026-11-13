@@ -15,4 +15,5 @@ public class VentaResponseDTO {
     private List<DetalleVentaResponseDTO> detalles;
     private int cantidadProductosVendidos;
     private LocalDateTime fechaVenta;
+    private String tiendaId;
 }

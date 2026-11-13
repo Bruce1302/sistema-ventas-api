@@ -16,5 +16,4 @@ public class UsuarioRequestDTO {
 
     @NotNull
     private RolUsuario rol;
-
 }

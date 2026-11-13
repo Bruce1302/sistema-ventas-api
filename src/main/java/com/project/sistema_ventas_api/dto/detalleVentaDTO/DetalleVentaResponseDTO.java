@@ -13,4 +13,5 @@ public class DetalleVentaResponseDTO {
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subTotal;
+    private String tiendaId;
 }

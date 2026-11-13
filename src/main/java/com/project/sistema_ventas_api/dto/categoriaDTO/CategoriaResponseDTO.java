@@ -7,5 +7,6 @@ public class CategoriaResponseDTO {
 
     private String id;
     private String nombre;
+    private String tiendaId;
 
 }

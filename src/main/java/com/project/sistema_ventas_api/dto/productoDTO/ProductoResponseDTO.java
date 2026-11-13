@@ -1,5 +1,6 @@
 package com.project.sistema_ventas_api.dto.productoDTO;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,4 +15,5 @@ public class ProductoResponseDTO {
     private String categoriaNombre;
     private BigDecimal precio;
     private int stock;
+    private String tiendaId;
 }

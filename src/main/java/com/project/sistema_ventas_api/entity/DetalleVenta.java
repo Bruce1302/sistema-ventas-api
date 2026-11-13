@@ -36,4 +36,8 @@ public class DetalleVenta extends AuditoriaBase{
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
+    @ManyToOne
+    @JoinColumn(name = "tienda_id")
+    private Tienda tienda;
+
 }

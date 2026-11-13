@@ -25,5 +25,9 @@ public class Usuario extends AuditoriaBase{
     @NotNull
     private RolUsuario rol;
 
+    @ManyToOne
+    @JoinColumn(name = "tienda_id")
+    private Tienda tienda;
+
 
 }

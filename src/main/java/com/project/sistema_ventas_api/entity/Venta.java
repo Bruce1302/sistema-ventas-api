@@ -25,6 +25,10 @@ public class Venta extends AuditoriaBase{
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
     private List<DetalleVenta> detalles;
 
+    @ManyToOne
+    @JoinColumn(name = "tienda_id")
+    private Tienda tienda;
+
 }
 
 

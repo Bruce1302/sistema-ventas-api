@@ -34,4 +34,8 @@ public class Producto  extends AuditoriaBase{
     @PositiveOrZero
     private Integer stock;
 
+    @ManyToOne
+    @JoinColumn(name = "tienda_id")
+    private Tienda tienda;
+
 }
