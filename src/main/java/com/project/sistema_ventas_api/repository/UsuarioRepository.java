@@ -16,4 +16,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
 
     Optional<Usuario> findByUsernameAndTienda_CodigoAndActivo(String username, String codigoTienda, boolean activo);
 
+    Optional<Usuario> findByUsernameAndTienda_IdAndActivo(String username, String tiendaId, Boolean activo);
+
 }

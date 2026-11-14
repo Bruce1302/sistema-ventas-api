@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
+import org.hibernate.annotations.TenantId;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +29,10 @@ public class Venta extends AuditoriaBase{
     @ManyToOne
     @JoinColumn(name = "tienda_id")
     private Tienda tienda;
+
+    @TenantId
+    @Column(name = "tienda_id", insertable = false, updatable = false)
+    private String tenantId;
 
 }
 

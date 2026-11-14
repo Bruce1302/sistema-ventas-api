@@ -28,9 +28,12 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService()
     {
-        return username ->
-        {
-            var usuario = usuarioRepository.findByUsernameAndActivo(username, true).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o usuario sin acceso"));
+        return username -> {
+            String tiendaId = TenantContext.getCurrentTenant();
+
+            // 2. Buscamos al usuario exigiendo username, tiendaId y estado activo
+            var usuario = usuarioRepository.findByUsernameAndTienda_IdAndActivo(username, tiendaId, true)
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o usuario sin acceso en esta tienda"));
 
             return new org.springframework.security.core.userdetails.User(
                     usuario.getUsername(),

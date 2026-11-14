@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.hibernate.annotations.TenantId;
 
 @Data
 @Entity
@@ -23,4 +24,5 @@ public class Tienda extends AuditoriaBase{
     private String direccion;
 
     private String telefono;
+
 }

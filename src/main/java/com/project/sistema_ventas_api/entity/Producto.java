@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
+import org.hibernate.annotations.TenantId;
 
 import java.math.BigDecimal;
 
@@ -37,5 +38,9 @@ public class Producto  extends AuditoriaBase{
     @ManyToOne
     @JoinColumn(name = "tienda_id")
     private Tienda tienda;
+
+    @TenantId
+    @Column(name = "tienda_id", insertable = false, updatable = false)
+    private String tenantId;
 
 }
