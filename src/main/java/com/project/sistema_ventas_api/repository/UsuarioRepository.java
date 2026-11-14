@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
-    List<Usuario> findAllByActivo(boolean b);
 
-    Optional<Usuario> findByUsernameAndActivo(String username, Boolean activo);
+    Optional<Usuario> findByUsernameAndTienda_Id(@NotBlank String username, @NotBlank String tiendaId);
 
-    Optional<Object> findByUsername(@NotBlank String username);
+    List<Usuario> findAllByTienda_Id(String tiendaId);
+
+    Optional<Usuario> findByIdAndTienda_Id(String id, String tiendaId);
 
     Optional<Usuario> findByUsernameAndTienda_CodigoAndActivo(String username, String codigoTienda, boolean activo);
 

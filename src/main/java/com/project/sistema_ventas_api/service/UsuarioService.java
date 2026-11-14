@@ -35,16 +35,17 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO nuevoUsuario(UsuarioRequestDTO requestDTO)
     {
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
         // Validamos manualmente que el pasword tenga contenido
         if (requestDTO.getPassword() == null || requestDTO.getPassword().trim().isEmpty())
             throw new IllegalArgumentException("La contraseña es obligatoria para usuarios nuevos");
 
         //Buscamos el username para no duplicarlo
-        if (usuarioRepository.findByUsername(requestDTO.getUsername()).isPresent())
+        if (usuarioRepository.findByUsernameAndTienda_Id(requestDTO.getUsername(), tiendaIdActual).isPresent())
             throw new IllegalArgumentException("El username '" + requestDTO.getUsername() + "' ya está en uso. Elige otro.");
 
         //obtenemos el id de la tienda
-        String tiendaIdActual = TenantContext.getCurrentTenant();
         Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
 
         Usuario usuario = usuarioMapper.toEntity(requestDTO);
@@ -57,7 +58,9 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> listarUsuarios()
     {
-        return  usuarioMapper.toDtoList(usuarioRepository.findAll());
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
+        return  usuarioMapper.toDtoList(usuarioRepository.findAllByTienda_Id(tiendaIdActual));
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +72,9 @@ public class UsuarioService {
     @Transactional
     public void eliminarUsuario(UUID id)
     {
-        Usuario usuarioEncontrado =  usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
+        Usuario usuarioEncontrado = usuarioRepository.findByIdAndTienda_Id(id.toString(), tiendaIdActual).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         usuarioEncontrado.setActivo(false);
         usuarioRepository.save(usuarioEncontrado);
@@ -78,7 +83,9 @@ public class UsuarioService {
     @Transactional
     public void activarUsuario(UUID id)
     {
-        Usuario usuarioEncontrado =  usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
+        Usuario usuarioEncontrado =  usuarioRepository.findByIdAndTienda_Id(id.toString(), tiendaIdActual).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         usuarioEncontrado.setActivo(true);
         usuarioRepository.save(usuarioEncontrado);
@@ -87,7 +94,9 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO actualizarUsuario(UsuarioRequestDTO requestDTO, UUID id)
     {
-        Usuario usuarioEncontrado = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
+        Usuario usuarioEncontrado = usuarioRepository.findByIdAndTienda_Id(id.toString(), tiendaIdActual).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         //actualizaos los datos
         usuarioEncontrado.setUsername(requestDTO.getUsername());
@@ -106,8 +115,10 @@ public class UsuarioService {
     @Transactional
     public void destruirUsuario(UUID id)
     {
+        String tiendaIdActual = TenantContext.getCurrentTenant();
+
         //validamos si el usuario existe
-        Usuario usuario = usuarioRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        Usuario usuario = usuarioRepository.findByIdAndTienda_Id(id.toString(), tiendaIdActual).orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         //eliminamos
         usuarioRepository.delete(usuario);
