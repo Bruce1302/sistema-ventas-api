@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +18,9 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
     List<Producto> findTopProductosMasVendidos(Pageable pageable);
 
     Page<Producto> findByNombreContainingIgnoreCaseAndActivo(String nombre, Boolean estado, Pageable pageable);
+
+    @Query("SELECT p FROM Producto p WHERE p.activo = true AND (LOWER(p.nombre) LIKE LOWER(CONCAT('%', :termino, '%')) OR p.codigo LIKE CONCAT('%', :termino, '%'))")
+    Page<Producto> buscarActivosPorNombreOCodigo(@Param("termino") String termino, Pageable pageable);
 
     Page<Producto> findByCategoria_IdInAndActivo(Collection<String> categoriaIds, Boolean activo, Pageable pageable);
 }
