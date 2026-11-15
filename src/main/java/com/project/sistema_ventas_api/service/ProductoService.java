@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,6 +49,30 @@ public class ProductoService {
 
         Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
 
+        //Antes de agregar, buscamos si ya existe el codigo de barras del producto
+        Optional<Producto> productoExistente = productoRepository.findFirstByCodigoOrderByActivoDesc(requestDTO.getCodigo());
+
+        //si es que existe
+        if(productoExistente.isPresent())
+        {
+            Producto producto = productoExistente.get();
+
+            System.out.println( "el producto esta " + producto.getActivo());
+            //si el codigo de barras ya esta registrado
+            if (producto.getActivo())
+                throw new IllegalArgumentException("Ya existe un producto con el código de barras '" + requestDTO.getCodigo() + "'.");
+
+            //Si el producto esta inactivo, significa que se elimino de forma logica, lo activamos y actualizamos datos
+            producto.setActivo(true);
+            producto.setNombre(requestDTO.getNombre());
+            producto.setPrecio(requestDTO.getPrecio());
+            producto.setStock(requestDTO.getStock());
+            producto.setCategoria(categoriaEncontrada);
+
+            return productoMapper.toDto(productoRepository.save(producto));
+        }
+
+        //si el producto no existe, se ingresa de forma normal
         Producto nuevoProducto = productoMapper.toEntity(requestDTO);
 
         nuevoProducto.setCategoria(categoriaEncontrada);
@@ -78,7 +103,13 @@ public class ProductoService {
     @Transactional
     public ProductoResponseDTO actualizarProducto(UUID id, ProductoRequestDTO requestDTO)
     {
-        Producto productoEncontrado = productoRepository.findById(id.toString()).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        productoRepository.findFirstByCodigoOrderByActivoDesc(requestDTO.getCodigo())
+        .ifPresent(p -> {
+            if (Boolean.TRUE.equals(p.getActivo()) && !p.getId().equals(id.toString()))
+                throw new IllegalArgumentException("El código de barras '" + requestDTO.getCodigo() + "' ya pertenece a otro producto.");
+        });
+
+        Producto productoEncontrado = productoRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado"));
 
         Categoria categoriaEncontrada = categoriaRepository.findById(requestDTO.getCategoriaId().toString()).orElseThrow(() -> new RecursoNoEncontradoException("Categoria no encontrada"));
         productoEncontrado.setNombre(requestDTO.getNombre());

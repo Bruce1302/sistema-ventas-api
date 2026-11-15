@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductoRepository extends JpaRepository<Producto, String> {
     Page<Producto> findAllByActivo(Boolean activo, Pageable pageable);
@@ -23,4 +24,6 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
     Page<Producto> buscarActivosPorNombreOCodigo(@Param("termino") String termino, Pageable pageable);
 
     Page<Producto> findByCategoria_IdInAndActivo(Collection<String> categoriaIds, Boolean activo, Pageable pageable);
+
+    Optional<Producto> findFirstByCodigoOrderByActivoDesc(String codigo);
 }
