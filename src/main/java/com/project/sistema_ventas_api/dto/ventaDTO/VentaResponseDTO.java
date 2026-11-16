@@ -1,6 +1,7 @@
 package com.project.sistema_ventas_api.dto.ventaDTO;
 
 import com.project.sistema_ventas_api.dto.detalleVentaDTO.DetalleVentaResponseDTO;
+import com.project.sistema_ventas_api.enums.TipoComprobante;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -16,4 +17,11 @@ public class VentaResponseDTO {
     private int cantidadProductosVendidos;
     private LocalDateTime fechaVenta;
     private String tiendaId;
+
+    private TipoComprobante tipoComprobante;
+    private String serieNumero;
+    private String externalId;
+    private String estadoSunat;
+    private String clienteNumDoc;
+    private String clienteNombre;
 }
