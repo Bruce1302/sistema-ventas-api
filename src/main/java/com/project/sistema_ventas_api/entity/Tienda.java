@@ -25,4 +25,26 @@ public class Tienda extends AuditoriaBase{
 
     private String telefono;
 
+    @Column(name = "facturacion_activa")
+    private Boolean facturacionActiva = false;
+
+    @Column(length = 11)
+    private String ruc;
+
+    @Column(name = "razon_social")
+    private String razonSocial;
+
+    @Column(name = "direccion_fiscal")
+    private String direccionFiscal;
+
+    @Column(name = "token_facturacion")
+    private String tokenFacturacion;
+
+    @Column(name = "serie_boleta", length = 4)
+    private String serieBoleta;
+
+    @Column(name = "serie_factura", length = 4)
+    private String serieFactura;
+
+
 }

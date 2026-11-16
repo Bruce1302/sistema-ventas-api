@@ -74,6 +74,13 @@ CREATE TABLE tienda (
     codigo VARCHAR(255) NOT NULL UNIQUE,
     direccion VARCHAR(255) NOT NULL,
     telefono VARCHAR(255),
+    facturacion_activa TINYINT(1) DEFAULT 0,
+    ruc VARCHAR(11),
+    razon_social VARCHAR(255),
+    direccion_fiscal VARCHAR(255),
+    token_facturacion VARCHAR(255),
+    serie_boleta VARCHAR(4),
+    serie_factura VARCHAR(4),
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME(6),
     fecha_actualizacion DATETIME(6)

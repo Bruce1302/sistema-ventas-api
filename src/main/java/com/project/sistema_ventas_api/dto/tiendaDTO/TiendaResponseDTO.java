@@ -14,4 +14,6 @@ public class TiendaResponseDTO {
     private String direccion;
 
     private String telefono;
+
+    private Boolean facturacionActiva;
 }
