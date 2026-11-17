@@ -79,6 +79,7 @@ public class VentaService {
             detalleVenta.setSubTotal(subTotal); //guardamos el subtotal
             detalleVenta.setVenta(venta); //Anclamos la venta a sus detalles
             detalleVenta.setTienda(tienda);
+            detalleVenta.setProducto(productoEncontrado);
 
             cantidadProductosVendidos += detalleVenta.getCantidad();
 

@@ -89,7 +89,7 @@ public class FacturacionService {
             else
             {
                 // Boleta menor a S/ 700 sin documento se usa "Clientes Varios"
-                cliente.put("codigo_tipo_documento_identidad", "-");
+                cliente.put("codigo_tipo_documento_identidad", "0");
                 cliente.put("numero_documento", "00000000");
                 cliente.put("apellidos_y_nombres_o_razon_social", "CLIENTES VARIOS");
             }
