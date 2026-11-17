@@ -6,6 +6,9 @@ import com.project.sistema_ventas_api.service.VentaService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -60,5 +63,15 @@ public class VentaController {
                                                         @RequestParam(defaultValue = "10") int size)
     {
         return ventaService.filtrarVentasPorFecha(fechaInicio, fechaFin, page, size);
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> emitirPdf(@PathVariable UUID id, @RequestParam(required = false) String formato)
+    {
+        byte[] pdfBytes = ventaService.obtenerPdfComprobante(id, formato);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"comprobante-" + id + ".pdf\"")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(pdfBytes);
     }
 }

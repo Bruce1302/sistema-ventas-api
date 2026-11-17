@@ -28,6 +28,7 @@ public class FacturacionService {
     }
 
     public void emitirComprobante(Venta venta, Tienda tienda) {
+
         // Si la tienda tiene facturación apagada o el cliente pidio Nota de Venta, no generamos consulta, sera una venta simple
         if (!Boolean.TRUE.equals(tienda.getFacturacionActiva()) || venta.getTipoComprobante() == null || venta.getTipoComprobante() == TipoComprobante.NOTA_VENTA)
         {
@@ -35,6 +36,21 @@ public class FacturacionService {
             return;
         }
 
+        // Validar reglas basicas antes de enviar a FactuSmart
+        if (venta.getTipoComprobante() == TipoComprobante.FACTURA
+                && (!"6".equals(venta.getClienteTipoDoc()) || venta.getClienteNumDoc() == null || venta.getClienteNumDoc().isBlank()))
+        {
+            throw new IllegalArgumentException("Para emitir Factura es obligatorio el RUC del cliente.");
+        }
+
+        if (venta.getClienteNumDoc() != null && !venta.getClienteNumDoc().isBlank()
+                && !"1".equals(venta.getClienteTipoDoc()) && !"6".equals(venta.getClienteTipoDoc())
+                && (venta.getClienteNombre() == null || venta.getClienteNombre().isBlank()))
+        {
+            throw new IllegalArgumentException("Para Carné de Extranjería u otros documentos debes ingresar el nombre del cliente.");
+        }
+
+        //Si los datos estan correctos entonces procesamos la factura
         try {
             String apiKey = tienda.getTokenFacturacion();
 
@@ -59,7 +75,7 @@ public class FacturacionService {
             // "01" = Factura, "03" = Boleta
             String codigoTipoDoc = (venta.getTipoComprobante() == TipoComprobante.FACTURA) ? "01" : "03";
 
-            // Armar datos del receptor (cliente)
+            // Armar datos del cliente
             Map<String, Object> cliente = new HashMap<>();
             if (venta.getClienteNumDoc() != null && !venta.getClienteNumDoc().isBlank())
             {
@@ -126,16 +142,20 @@ public class FacturacionService {
         }
     }
 
-    public byte[] descargarPdf(String externalId, Tienda tienda)
+    public byte[] descargarPdf(String externalId, Tienda tienda, String formato)
     {
         return restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/documents/{externalId}/pdf")
-                        .queryParam("ruc", tienda.getRuc())
-                        .build(externalId))
-                .header("X-API-Key", tienda.getTokenFacturacion())
-                .retrieve()
-                .body(byte[].class);
+            .uri(uriBuilder -> {
+                uriBuilder.path("/documents/{externalId}/pdf")
+                        .queryParam("ruc", tienda.getRuc());
+                if (formato != null && !formato.isBlank()) {
+                    uriBuilder.queryParam("formato", formato);
+                }
+                return uriBuilder.build(externalId);
+            })
+            .header("X-API-Key", tienda.getTokenFacturacion())
+            .retrieve()
+            .body(byte[].class);
     }
 
     private Map<String, Object> mapearItemCalcular(DetalleVenta detalle)

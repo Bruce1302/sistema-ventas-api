@@ -6,6 +6,7 @@ import com.project.sistema_ventas_api.entity.DetalleVenta;
 import com.project.sistema_ventas_api.entity.Producto;
 import com.project.sistema_ventas_api.entity.Tienda;
 import com.project.sistema_ventas_api.entity.Venta;
+import com.project.sistema_ventas_api.enums.TipoComprobante;
 import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.VentaMapper;
 import com.project.sistema_ventas_api.repository.ProductoRepository;
@@ -31,13 +32,15 @@ public class VentaService {
     private final ProductoRepository productoRepository;
     private final VentaMapper ventaMapper;
     private final TiendaRepository tiendaRepository;
+    private final FacturacionService facturacionService;
 
-    public VentaService(VentaRepository ventaRepository, ProductoRepository productoRepository, VentaMapper ventaMapper, TiendaRepository tiendaRepository)
+    public VentaService(VentaRepository ventaRepository, ProductoRepository productoRepository, VentaMapper ventaMapper, TiendaRepository tiendaRepository, FacturacionService facturacionService)
     {
         this.ventaRepository = ventaRepository;
         this.productoRepository = productoRepository;
         this.ventaMapper = ventaMapper;
         this.tiendaRepository = tiendaRepository;
+        this.facturacionService = facturacionService;
     }
 
     @Transactional
@@ -45,7 +48,7 @@ public class VentaService {
     {
         //Obtenemos el id de la tienda
         String tiendaIdActual = TenantContext.getCurrentTenant();
-        Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
+        Tienda tienda = tiendaRepository.findById(tiendaIdActual).orElseThrow(() -> new RecursoNoEncontradoException("Tienda no encontrada"));
 
         //Creamos el nuevo registro de venta
         Venta venta = new Venta();
@@ -75,7 +78,7 @@ public class VentaService {
             detalleVenta.setPrecioUnitario(productoEncontrado.getPrecio()); //Guardamos el precio unitario
             detalleVenta.setSubTotal(subTotal); //guardamos el subtotal
             detalleVenta.setVenta(venta); //Anclamos la venta a sus detalles
-            detalleVenta.setTienda(tiendaRef);
+            detalleVenta.setTienda(tienda);
 
             cantidadProductosVendidos += detalleVenta.getCantidad();
 
@@ -88,10 +91,25 @@ public class VentaService {
         //Guardamos el total y los detalles de la venta realizada
         venta.setTotal(total);
         venta.setDetalles(detallesAceptados);
-        venta.setTienda(tiendaRef);
+        venta.setTienda(tienda);
 
-        //Guardamos la venta y recibimos el response
-        VentaResponseDTO dto = ventaMapper.toDto(ventaRepository.save(venta));
+        //Facturacion
+        venta.setTipoComprobante(requestDTO.getTipoComprobante() != null ? requestDTO.getTipoComprobante() : TipoComprobante.NOTA_VENTA);
+        venta.setClienteTipoDoc(requestDTO.getClienteTipoDoc());
+        venta.setClienteNumDoc(requestDTO.getClienteNumDoc());
+        venta.setClienteNombre(requestDTO.getClienteNombre());
+
+        //guardamos en la bd para generar el UUID necesario para la facturacion
+        Venta ventaGuardada = ventaRepository.save(venta);
+
+        // Emitimos el comprobante si es NOTA_VENTA o la facturación esta desactivada para esta tienda, queda como INTERNO
+        facturacionService.emitirComprobante(ventaGuardada, tienda);
+
+        // Actualizamos la venta con serieNumero, externalId y estadoSunat
+        ventaGuardada = ventaRepository.save(ventaGuardada);
+
+        //convertimos la venta a dto para el response
+        VentaResponseDTO dto = ventaMapper.toDto(ventaGuardada);
 
         //LLenamos el dato faltante
         dto.setCantidadProductosVendidos(cantidadProductosVendidos);
@@ -101,6 +119,17 @@ public class VentaService {
         //NO se necesita guardar manualmente los detalles en la bd, al haber una relacion en las entidades, se hace automaticamente
 
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] obtenerPdfComprobante(UUID ventaId, String formato)
+    {
+        Venta venta = ventaRepository.findById(ventaId.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada"));
+
+        if (venta.getExternalId() == null || venta.getExternalId().isBlank())
+            throw new IllegalArgumentException("Esta venta no tiene un comprobante electrónico emitido.");
+
+        return facturacionService.descargarPdf(venta.getExternalId(), venta.getTienda(), formato);
     }
 
     @Transactional(readOnly = true)
