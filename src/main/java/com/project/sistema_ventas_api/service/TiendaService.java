@@ -3,6 +3,7 @@ package com.project.sistema_ventas_api.service;
 import com.project.sistema_ventas_api.dto.tiendaDTO.TiendaRequestDTO;
 import com.project.sistema_ventas_api.dto.tiendaDTO.TiendaResponseDTO;
 import com.project.sistema_ventas_api.entity.Tienda;
+import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.TiendaMapper;
 import com.project.sistema_ventas_api.repository.TiendaRepository;
 import org.springframework.stereotype.Service;
@@ -30,15 +31,15 @@ public class TiendaService {
     }
 
     @Transactional(readOnly = true)
-    public List<TiendaResponseDTO> listarTiendas()
+    public TiendaResponseDTO llamarTienda(UUID id)
     {
-        return tiendaMapper.toDtoList(tiendaRepository.findAll());
+        return tiendaMapper.toDto(tiendaRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Tienda no encontrada")));
     }
 
     @Transactional
     public void eliminarTienda(UUID id)
     {
-        Tienda tiendaEncontrada = tiendaRepository.findById(id.toString()).orElseThrow(() -> new RuntimeException("Tienda no encontrada"));
+        Tienda tiendaEncontrada = tiendaRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Tienda no encontrada"));
 
         tiendaEncontrada.setActivo(false);
     }

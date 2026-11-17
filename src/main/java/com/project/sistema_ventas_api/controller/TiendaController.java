@@ -25,10 +25,10 @@ public class TiendaController {
         return tiendaService.nuevaTienda(requestDTO);
     }
 
-    @GetMapping
-    public List<TiendaResponseDTO> listarTiendas()
+    @GetMapping("/{id}")
+    public TiendaResponseDTO llamarTienda( @PathVariable UUID id)
     {
-        return tiendaService.listarTiendas();
+        return tiendaService.llamarTienda(id);
     }
 
     @DeleteMapping
@@ -36,5 +36,6 @@ public class TiendaController {
     {
         tiendaService.eliminarTienda(id);
     }
+
 
 }
