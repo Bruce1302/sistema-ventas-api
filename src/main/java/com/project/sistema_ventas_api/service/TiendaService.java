@@ -31,7 +31,7 @@ public class TiendaService {
     }
 
     @Transactional(readOnly = true)
-    public TiendaResponseDTO llamarTienda(UUID id)
+    public TiendaResponseDTO llamarTienda(String id)
     {
         return tiendaMapper.toDto(tiendaRepository.findById(id.toString()).orElseThrow(() -> new RecursoNoEncontradoException("Tienda no encontrada")));
     }

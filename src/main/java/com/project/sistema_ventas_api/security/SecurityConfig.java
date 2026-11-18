@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,"/productos/**", "/categorias/**").hasRole("ADMIN")
 
                         //Ambos pueden ver los productos y categorias
-                        .requestMatchers(HttpMethod.GET, "/productos/**", "/categorias/**").hasAnyRole("ADMIN", "CAJERO")
+                        .requestMatchers(HttpMethod.GET, "/productos/**", "/categorias/**", "/tiendas/**").hasAnyRole("ADMIN", "CAJERO")
 
                         //Solo admin controla los usuarios
                         .requestMatchers("/usuarios/**").hasRole("ADMIN")

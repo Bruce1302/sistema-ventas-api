@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/tienda")
+@RequestMapping("/tiendas")
 public class TiendaController {
 
     private final TiendaService tiendaService;
@@ -26,7 +26,7 @@ public class TiendaController {
     }
 
     @GetMapping("/{id}")
-    public TiendaResponseDTO llamarTienda( @PathVariable UUID id)
+    public TiendaResponseDTO llamarTienda( @PathVariable String id)
     {
         return tiendaService.llamarTienda(id);
     }
