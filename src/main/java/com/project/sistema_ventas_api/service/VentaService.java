@@ -6,6 +6,7 @@ import com.project.sistema_ventas_api.entity.DetalleVenta;
 import com.project.sistema_ventas_api.entity.Producto;
 import com.project.sistema_ventas_api.entity.Tienda;
 import com.project.sistema_ventas_api.entity.Venta;
+import com.project.sistema_ventas_api.enums.EstadoSunat;
 import com.project.sistema_ventas_api.enums.TipoComprobante;
 import com.project.sistema_ventas_api.exception.RecursoNoEncontradoException;
 import com.project.sistema_ventas_api.mapper.VentaMapper;
@@ -193,5 +194,25 @@ public class VentaService {
             return dto;
         });
 
+    }
+
+    @Transactional
+    public VentaResponseDTO reenviarVentaSunat(String ventaId)
+    {
+        Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada"));
+
+        if (venta.getEstadoSunat() != EstadoSunat.PENDIENTE)
+            throw new IllegalArgumentException("Solo se pueden reenviar comprobantes en estado PENDIENTE.");
+
+        facturacionService.reenviarComprobante(venta, venta.getTienda());
+        Venta ventaActualizada = ventaRepository.save(venta);
+
+        VentaResponseDTO dto = ventaMapper.toDto(ventaActualizada);
+        dto.setCantidadProductosVendidos(
+                ventaActualizada.getDetalles().stream()
+                        .mapToInt(DetalleVenta::getCantidad)
+                        .sum()
+        );
+        return dto;
     }
 }

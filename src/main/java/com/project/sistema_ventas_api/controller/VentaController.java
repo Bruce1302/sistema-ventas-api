@@ -74,4 +74,10 @@ public class VentaController {
             .contentType(MediaType.APPLICATION_PDF)
             .body(pdfBytes);
     }
+
+    @PostMapping("/{id}/reenviar")
+    public VentaResponseDTO reenviarSunat(@PathVariable String id)
+    {
+        return ventaService.reenviarVentaSunat(id);
+    }
 }

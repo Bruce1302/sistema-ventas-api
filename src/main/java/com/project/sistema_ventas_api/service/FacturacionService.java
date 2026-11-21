@@ -142,6 +142,42 @@ public class FacturacionService {
         }
     }
 
+    public void reenviarComprobante(Venta venta, Tienda tienda)
+    {
+        if (venta.getExternalId() == null || venta.getExternalId().isBlank())
+            throw new IllegalArgumentException("Esta venta no tiene un externalId registrado en FactuSmart para reenviar.");
+
+
+        try {
+            Map<String, Object> respuestaDoc = restClient.post()
+                    .uri("/documents/{externalId}/reenviar", venta.getExternalId())
+                    .header("X-API-Key", tienda.getTokenFacturacion())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("ruc", tienda.getRuc()))
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+
+            if (respuestaDoc != null)
+            {
+                Boolean aceptado = (Boolean) respuestaDoc.get("aceptado_por_sunat");
+                String estadoCodigo = (String) respuestaDoc.get("estado");
+
+                if (Boolean.TRUE.equals(aceptado) || "05".equals(estadoCodigo))
+                    venta.setEstadoSunat(EstadoSunat.ACEPTADO);
+                else if ("09".equals(estadoCodigo))
+                    venta.setEstadoSunat(EstadoSunat.RECHAZADO);
+                else
+                    venta.setEstadoSunat(EstadoSunat.PENDIENTE);
+
+            }
+        } catch (Exception e) {
+            // Si SUNAT o FactuSmart siguen caídos, mantenemos el estado PENDIENTE sin romper
+            venta.setEstadoSunat(EstadoSunat.PENDIENTE);
+            System.err.println("Error al reenviar comprobante en FactuSmart: " + e.getMessage());
+            throw new RuntimeException("No se pudo conectar con SUNAT en este momento. Intenta más tarde.");
+        }
+    }
+
     public byte[] descargarPdf(String externalId, Tienda tienda, String formato)
     {
         return restClient.get()
