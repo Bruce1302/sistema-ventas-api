@@ -17,6 +17,7 @@ import com.project.sistema_ventas_api.security.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,7 +139,7 @@ public class VentaService {
     public Page<VentaResponseDTO> listarVentas(int page, int size)
     {
         //solicitud de paginacion
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").descending());
 
         Page<Venta> paginaVentas = ventaRepository.findAllByActivo(true, pageable);
 
@@ -184,7 +185,7 @@ public class VentaService {
         if (fechaInicio == null || fechaFin == null)
             return listarVentas(0, 10);
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").descending());
 
         Page<Venta> ventasEncontradas = ventaRepository.findByFechaCreacionBetween(fechaInicio, fechaFin, pageable);
 
