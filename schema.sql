@@ -74,10 +74,12 @@ CREATE TABLE venta (
     cliente_tipo_doc VARCHAR(2),
     cliente_num_doc VARCHAR(15),
     cliente_nombre VARCHAR(255),
+    idempotency_key VARCHAR(100),
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME(6),
     fecha_actualizacion DATETIME(6),
-    CONSTRAINT fk_venta_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
+    CONSTRAINT fk_venta_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id),
+    CONSTRAINT uk_venta_tienda_idempotency UNIQUE (tienda_id, idempotency_key)
 
 );
 
@@ -172,10 +174,12 @@ CREATE TABLE venta (
     cliente_tipo_doc VARCHAR(2),
     cliente_num_doc VARCHAR(15),
     cliente_nombre VARCHAR(255),
+    idempotency_key VARCHAR(100),
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP(6),
     fecha_actualizacion TIMESTAMP(6),
-    CONSTRAINT fk_venta_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id)
+    CONSTRAINT fk_venta_tienda FOREIGN KEY (tienda_id) REFERENCES tienda (id),
+    CONSTRAINT uk_venta_tienda_idempotency UNIQUE (tienda_id, idempotency_key)
 );
 
 -- 6. Tabla Detalle Venta
