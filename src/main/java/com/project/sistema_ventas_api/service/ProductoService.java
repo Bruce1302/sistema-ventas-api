@@ -57,7 +57,7 @@ public class ProductoService {
         {
             Producto producto = productoExistente.get();
 
-            System.out.println( "el producto esta " + producto.getActivo());
+            //System.out.println( "el producto esta " + producto.getActivo());
             //si el codigo de barras ya esta registrado
             if (producto.getActivo())
                 throw new IllegalArgumentException("Ya existe un producto con el código de barras '" + requestDTO.getCodigo() + "'.");

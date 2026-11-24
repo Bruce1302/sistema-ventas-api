@@ -1,9 +1,11 @@
 package com.project.sistema_ventas_api.repository;
 
 import com.project.sistema_ventas_api.entity.Producto;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +28,8 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
     Page<Producto> findByCategoria_IdInAndActivo(Collection<String> categoriaIds, Boolean activo, Pageable pageable);
 
     Optional<Producto> findFirstByCodigoOrderByActivoDesc(String codigo);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Producto p WHERE p.id = :id")
+    Optional<Producto> findByIdConBloqueo(@Param("id") String id);
 }
