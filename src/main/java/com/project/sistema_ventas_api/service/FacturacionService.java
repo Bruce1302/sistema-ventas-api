@@ -7,9 +7,12 @@ import com.project.sistema_ventas_api.enums.EstadoSunat;
 import com.project.sistema_ventas_api.enums.TipoComprobante;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.core.ParameterizedTypeReference;
+
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +27,11 @@ public class FacturacionService {
 
     public FacturacionService(@Value("${factusmart.api.url}") String apiUrl)
     {
-        this.restClient = RestClient.builder().baseUrl(apiUrl).build();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(5));// Máximo 5s para conectar con FactuSmart
+        factory.setReadTimeout(Duration.ofSeconds(15));// Máximo 15s esperando respuesta de SUNAT
+
+        this.restClient = RestClient.builder().baseUrl(apiUrl).requestFactory(factory).build();
     }
 
     public void emitirComprobante(Venta venta, Tienda tienda) {
