@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface VentaRepository extends JpaRepository<Venta, String> {
 
@@ -13,4 +14,6 @@ public interface VentaRepository extends JpaRepository<Venta, String> {
 
     //Para los filtros
     Page<Venta> findByFechaCreacionBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin, Pageable pageable);
+
+    Optional<Venta> findByIdempotencyKey(String idempotencyKey);
 }

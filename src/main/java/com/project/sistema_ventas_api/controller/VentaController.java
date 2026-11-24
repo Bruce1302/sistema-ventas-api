@@ -27,7 +27,7 @@ public class VentaController {
     }
 
     @PostMapping()
-    public VentaResponseDTO nuevaVenta(@Valid @RequestBody VentaRequestDTO requestDTO)
+    public VentaResponseDTO nuevaVenta(@Valid @RequestBody VentaRequestDTO requestDTO, @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey)
     {
         return ventaService.registrarVenta(requestDTO);
     }

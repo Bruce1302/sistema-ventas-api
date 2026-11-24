@@ -14,6 +14,7 @@ import com.project.sistema_ventas_api.repository.ProductoRepository;
 import com.project.sistema_ventas_api.repository.TiendaRepository;
 import com.project.sistema_ventas_api.repository.VentaRepository;
 import com.project.sistema_ventas_api.security.TenantContext;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class VentaService {
@@ -49,8 +47,23 @@ public class VentaService {
         this.transactionTemplate = transactionTemplate;
     }
 
-    public VentaResponseDTO registrarVenta(VentaRequestDTO requestDTO)
+    public VentaResponseDTO registrarVenta(VentaRequestDTO requestDTO, String idempotencyKey)
     {
+        String keyLimpia = (idempotencyKey != null && !idempotencyKey.isBlank()) ? idempotencyKey.trim() : null;
+
+        if (keyLimpia != null)
+        {
+            Optional<Venta> ventaExistente = transactionTemplate.execute(status -> {
+                Optional<Venta> opt = ventaRepository.findByIdempotencyKey(keyLimpia);
+                opt.ifPresent(v -> v.getDetalles().size()); // Inicializamos detalles antes de cerrar la sesión
+                return opt;
+            });
+
+            if (ventaExistente != null && ventaExistente.isPresent())
+                return mapearVentaCompleta(ventaExistente.get());
+
+        }
+
         //  Validaciones previas
         if (requestDTO.getDetalles() == null || requestDTO.getDetalles().isEmpty())
             throw new IllegalArgumentException("La venta debe tener al menos un producto.");
@@ -65,52 +78,74 @@ public class VentaService {
         TipoComprobante tipoComp = requestDTO.getTipoComprobante() != null ? requestDTO.getTipoComprobante() : TipoComprobante.NOTA_VENTA;
 
         if (tipoComp == TipoComprobante.FACTURA
-                && (!"6".equals(requestDTO.getClienteTipoDoc()) || requestDTO.getClienteNumDoc() == null || requestDTO.getClienteNumDoc().isBlank()))
+                && (!"6".equals(requestDTO.getClienteTipoDoc()) || requestDTO.getClienteNumDoc() == null || !requestDTO.getClienteNumDoc().trim().matches("\\d{11}")))
             throw new IllegalArgumentException("Para emitir Factura es obligatorio el RUC del cliente.");
 
         // Transacción corta se nloquea stock, descuenta y guarda venta
-        Venta ventaGuardada = transactionTemplate.execute(status -> {
-            Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
-            Venta venta = new Venta();
-            BigDecimal total = BigDecimal.ZERO;
+        Venta ventaGuardada;
+        try
+        {
+            ventaGuardada = transactionTemplate.execute(status -> {
+                Tienda tiendaRef = tiendaRepository.getReferenceById(tiendaIdActual);
+                Venta venta = new Venta();
+                BigDecimal total = BigDecimal.ZERO;
 
-            List<DetalleVenta> detallesVenta = ventaMapper.toEntity(requestDTO).getDetalles();
-            detallesVenta.sort(Comparator.comparing(d -> d.getProducto().getId()));
+                List<DetalleVenta> detallesVenta = ventaMapper.toEntity(requestDTO).getDetalles();
+                detallesVenta.sort(Comparator.comparing(d -> d.getProducto().getId()));
 
-            List<DetalleVenta> detallesAceptados = new ArrayList<>();
+                List<DetalleVenta> detallesAceptados = new ArrayList<>();
 
-            for (DetalleVenta detalleVenta : detallesVenta)
+                for (DetalleVenta detalleVenta : detallesVenta)
+                {
+                    Producto productoEncontrado = productoRepository.findByIdConBloqueo(detalleVenta.getProducto().getId())
+                            .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado " + detalleVenta.getProducto().getId()));
+
+                    if (productoEncontrado.getStock() < detalleVenta.getCantidad())
+                        throw new IllegalArgumentException("No hay stock suficiente para el producto " + productoEncontrado.getNombre());
+
+
+                    BigDecimal subTotal = productoEncontrado.getPrecio().multiply(BigDecimal.valueOf(detalleVenta.getCantidad()));
+                    total = total.add(subTotal);
+
+                    detalleVenta.setPrecioUnitario(productoEncontrado.getPrecio());
+                    detalleVenta.setSubTotal(subTotal);
+                    detalleVenta.setVenta(venta);
+                    detalleVenta.setTienda(tiendaRef);
+                    detalleVenta.setProducto(productoEncontrado);
+
+                    productoEncontrado.setStock(productoEncontrado.getStock() - detalleVenta.getCantidad());
+                    detallesAceptados.add(detalleVenta);
+                }
+
+                venta.setTotal(total);
+                venta.setDetalles(detallesAceptados);
+                venta.setTienda(tiendaRef);
+                venta.setTipoComprobante(tipoComp);
+                venta.setClienteTipoDoc(requestDTO.getClienteTipoDoc());
+                venta.setClienteNumDoc(requestDTO.getClienteNumDoc());
+                venta.setClienteNombre(requestDTO.getClienteNombre());
+
+                venta.setIdempotencyKey(keyLimpia);
+
+                return ventaRepository.save(venta);
+            });
+
+        }
+        catch (DataIntegrityViolationException ex)
+        {
+            //cuando llegue 2 veces la misma venta
+            if (keyLimpia != null)
             {
-                Producto productoEncontrado = productoRepository.findByIdConBloqueo(detalleVenta.getProducto().getId())
-                        .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado " + detalleVenta.getProducto().getId()));
-
-                if (productoEncontrado.getStock() < detalleVenta.getCantidad())
-                    throw new IllegalArgumentException("No hay stock suficiente para el producto " + productoEncontrado.getNombre());
-
-
-                BigDecimal subTotal = productoEncontrado.getPrecio().multiply(BigDecimal.valueOf(detalleVenta.getCantidad()));
-                total = total.add(subTotal);
-
-                detalleVenta.setPrecioUnitario(productoEncontrado.getPrecio());
-                detalleVenta.setSubTotal(subTotal);
-                detalleVenta.setVenta(venta);
-                detalleVenta.setTienda(tiendaRef);
-                detalleVenta.setProducto(productoEncontrado);
-
-                productoEncontrado.setStock(productoEncontrado.getStock() - detalleVenta.getCantidad());
-                detallesAceptados.add(detalleVenta);
+                Venta existente = transactionTemplate.execute(status -> {
+                    Venta v = ventaRepository.findByIdempotencyKey(keyLimpia).orElseThrow(() -> ex);
+                    v.getDetalles().size();
+                    return v;
+                });
+                return mapearVentaCompleta(existente);
             }
+            throw ex;
+        }
 
-            venta.setTotal(total);
-            venta.setDetalles(detallesAceptados);
-            venta.setTienda(tiendaRef);
-            venta.setTipoComprobante(tipoComp);
-            venta.setClienteTipoDoc(requestDTO.getClienteTipoDoc());
-            venta.setClienteNumDoc(requestDTO.getClienteNumDoc());
-            venta.setClienteNombre(requestDTO.getClienteNombre());
-
-            return ventaRepository.save(venta);
-        });
 
         // Facturación externa fuera de transaccion
         facturacionService.emitirComprobante(ventaGuardada, tienda);
@@ -118,13 +153,18 @@ public class VentaService {
         // Microtransaccin para guardar respuesta SUNAT y mapear DTO
         return transactionTemplate.execute(status -> {
             Venta ventaFinal = ventaRepository.save(ventaGuardada);
-            VentaResponseDTO dto = ventaMapper.toDto(ventaFinal);
-            int cantidadProductosVendidos = ventaFinal.getDetalles().stream()
-                    .mapToInt(DetalleVenta::getCantidad)
-                    .sum();
-            dto.setCantidadProductosVendidos(cantidadProductosVendidos);
-            return dto;
+            return mapearVentaCompleta(ventaFinal);
         });
+    }
+
+    private VentaResponseDTO mapearVentaCompleta(Venta venta)
+    {
+        VentaResponseDTO dto = ventaMapper.toDto(venta);
+        int cantidadProductosVendidos = venta.getDetalles().stream()
+                .mapToInt(DetalleVenta::getCantidad)
+                .sum();
+        dto.setCantidadProductosVendidos(cantidadProductosVendidos);
+        return dto;
     }
 
     @Transactional(readOnly = true)

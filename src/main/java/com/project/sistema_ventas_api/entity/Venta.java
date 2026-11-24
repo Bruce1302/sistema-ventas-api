@@ -13,6 +13,15 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(
+    name = "venta",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_venta_tienda_idempotency",
+            columnNames = {"tienda_id", "idempotency_key"}
+        )
+    }
+)
 public class Venta extends AuditoriaBase{
 
     @Id
@@ -56,6 +65,9 @@ public class Venta extends AuditoriaBase{
 
     @Column(name = "cliente_nombre")
     private String clienteNombre;
+
+    @Column(name = "idempotency_key", length = 100)
+    private String idempotencyKey;
 
 }
 
