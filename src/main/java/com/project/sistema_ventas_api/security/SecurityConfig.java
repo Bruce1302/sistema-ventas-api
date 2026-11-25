@@ -14,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -40,22 +41,26 @@ public class SecurityConfig {
 
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Evita bloqueos de preflight CORS
                         .requestMatchers("/auth/**").permitAll() // La puerta de entrada libre
 
                         //Reglas operativas
-                        .requestMatchers(HttpMethod.POST, "/ventas/**").hasAnyRole("ADMIN", "CAJERO")
-                        .requestMatchers(HttpMethod.GET, "/ventas/**").hasAnyRole("ADMIN", "CAJERO")
-                        .requestMatchers(HttpMethod.POST, "/productos/**", "/categorias/**").hasAnyRole("ADMIN", "CAJERO")
+                        .requestMatchers(HttpMethod.POST, "/ventas/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
+                        .requestMatchers(HttpMethod.GET, "/ventas/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
+                        .requestMatchers(HttpMethod.POST, "/productos/**", "/categorias/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
 
                         //Operaciones administrativas
-                        .requestMatchers(HttpMethod.PUT,"/productos/**", "/categorias/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/productos/**", "/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/productos/**", "/categorias/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
+                        .requestMatchers(HttpMethod.DELETE,"/productos/**", "/categorias/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
 
-                        //Ambos pueden ver los productos y categorias
-                        .requestMatchers(HttpMethod.GET, "/productos/**", "/categorias/**", "/tiendas/**").hasAnyRole("ADMIN", "CAJERO")
+                        //Ambos pueden ver los productos, categorias y usuarios
+                        .requestMatchers(HttpMethod.GET, "/productos/**", "/categorias/**", "/tiendas/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
+                        .requestMatchers("/usuarios/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "CAJERO")
 
-                        //Solo admin controla los usuarios
-                        .requestMatchers("/usuarios/**").hasRole("ADMIN")
+                        //Solo el super admin controla las tiendas
+                        .requestMatchers("/tiendas/**").hasRole("SUPER_ADMIN")
+
+                        // Cierre de seguridad por defecto para cualquier endpoint futuro
                         .anyRequest().authenticated()
 
                 )
@@ -69,9 +74,19 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontendUrl)); // Permite conectarse al fronted
+
+        // Permite conectarse a varios frontend
+        List<String> origenes = Arrays.stream(frontendUrl.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toList();
+
+        configuration.setAllowedOrigins(origenes);
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Idempotency-Key"));
+        configuration.setExposedHeaders(List.of("Content-Disposition"));
+        configuration.setMaxAge(3600L);
+
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
